@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
 
-from .models import Question
+from polls.models import Question
 
 
 class QuestionModelTests(TestCase):
@@ -123,3 +123,53 @@ class QuestionDetailViewTests(TestCase):
         url = reverse("polls:detail", args=(past_question.id,))
         response = self.client.get(url)
         self.assertContains(response, past_question.question_text)
+        
+class WarmHotQuestionTests(TestCase):
+    def create_question_with_votes(self, question_text, days, votes_list):
+        """
+        Create a question with choices, each having a specific number of votes.
+        """
+        question = create_question(question_text=question_text, days=days)
+        for votes in votes_list:
+            question.choice_set.create(choice_text="Choice", votes=votes)
+        return question
+
+    def test_warm_question(self):
+        """
+        A question with total votes between 10 and 50 should be categorized as warm.
+        """
+        question = self.create_question_with_votes("Warm Question", days=-1, votes_list=[30])
+        total_votes = sum(choice.votes for choice in question.choice_set.all())
+        self.assertTrue(10 < total_votes <= 50)
+
+    def test_hot_question(self):
+        """
+        A question with total votes greater than 50 should be categorized as hot.
+        """
+        question = self.create_question_with_votes("Hot Question", days=-1, votes_list=[60])
+        total_votes = sum(choice.votes for choice in question.choice_set.all())
+        self.assertTrue(total_votes > 50)
+
+    def test_cold_question(self):
+        """
+        A question with total votes less than or equal to 10 should not be warm or hot.
+        """
+        question = self.create_question_with_votes("Cold Question", days=-1, votes_list=[5])
+        total_votes = sum(choice.votes for choice in question.choice_set.all())
+        self.assertTrue(total_votes <= 10)
+
+    def test_mixed_votes_warm(self):
+        """
+        A question with multiple choices where the total votes fall in the warm range.
+        """
+        question = self.create_question_with_votes("Mixed Warm Question", days=-1, votes_list=[10, 20, 5])
+        total_votes = sum(choice.votes for choice in question.choice_set.all())
+        self.assertTrue(10 < total_votes <= 50)
+
+    def test_mixed_votes_hot(self):
+        """
+        A question with multiple choices where the total votes fall in the hot range.
+        """
+        question = self.create_question_with_votes("Mixed Hot Question", days=-1, votes_list=[25, 30, 10])
+        total_votes = sum(choice.votes for choice in question.choice_set.all())
+        self.assertTrue(total_votes > 50)
