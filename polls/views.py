@@ -15,12 +15,16 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         """
-        Return the last five published questions (not including those set to be
-        published in the future).
+        Return the last five published questions and categorize them.
         """
-        return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[
-        :5
-    ]
+        questions = Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:5]
+
+        for question in questions:
+            # Calculate total votes for each question
+            total_votes = sum(choice.votes for choice in question.choice_set.all())
+            question.total_votes = total_votes
+
+        return questions
 
 
 class DetailView(generic.DetailView):
