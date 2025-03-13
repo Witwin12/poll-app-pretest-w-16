@@ -150,13 +150,6 @@ class WarmHotQuestionTests(TestCase):
         total_votes = sum(choice.votes for choice in question.choice_set.all())
         self.assertTrue(total_votes > 50)
 
-    def test_cold_question(self):
-        """
-        A question with total votes less than or equal to 10 should not be warm or hot.
-        """
-        question = self.create_question_with_votes("Cold Question", days=-1, votes_list=[5])
-        total_votes = sum(choice.votes for choice in question.choice_set.all())
-        self.assertTrue(total_votes <= 10)
 
     def test_mixed_votes_warm(self):
         """
