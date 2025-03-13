@@ -7,40 +7,11 @@
 </style>
 
 {% if latest_question_list %}
-    <h2>All Questions</h2>
     <ul>
     {% for question in latest_question_list %}
-        <li>
-            <a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a> 
-            (Votes: {{ question.total_votes }})
-        </li>
+    <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
     {% endfor %}
     </ul>
-
-    <h4>Warm Questions (10 - 50 votes)</h4>
-    <ul>
-    {% for question in latest_question_list %}
-        {% if question.total_votes > 10 and question.total_votes <= 50 %}
-            <li>
-                <a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a> 
-                (Votes: {{ question.total_votes }})
-            </li>
-        {% endif %}
-    {% endfor %}
-    </ul>
-
-    <h4>Hot Questions (More than 50 votes)</h4>
-    <ul>
-    {% for question in latest_question_list %}
-        {% if question.total_votes > 50 %}
-            <li>
-                <a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a> 
-                (Votes: {{ question.total_votes }})
-            </li>
-        {% endif %}
-    {% endfor %}
-    </ul>
-
-{% else %}
-    <p>No polls are available.</p>
-{% endif %}
+    {% else %}
+        <p>No polls are available.</p>
+    {% endif %}

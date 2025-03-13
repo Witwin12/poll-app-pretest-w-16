@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
-from .models import Choice, Question
+from .models import Choice, Question,Pirvate_Question,Pirvate_Choice
 from django.http import Http404
 from django.utils import timezone
 
@@ -65,3 +65,29 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
+    
+class pirvate_polls(generic.ListView):
+        template_name = "polls/pirvate_poll.html"
+        context_object_name = "latest_question_list"
+
+        def get_queryset(self):
+            """
+            Return the last five published questions and categorize them.
+            """
+            questions = Pirvate_Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:5]
+
+            return questions
+
+class PirvateDetailView(generic.DetailView):
+    model = Pirvate_Question
+    template_name = "polls/pirvate_detail.html"
+    def get_queryset(self):
+        """
+        Excludes any questions that aren't published yet.
+        """
+        return Pirvate_Question.objects.filter(pub_date__lte=timezone.now())
+
+
+class PirvateResultsView(generic.DetailView):
+    model = Pirvate_Question
+    template_name = "polls/pirvate_results.html"
