@@ -7,8 +7,6 @@ from .models import Choice, Question,Pirvate_Question,Pirvate_Choice
 from django.http import Http404
 from django.utils import timezone
 
-from .models import Choice, Question
-
 class IndexView(generic.ListView):
     template_name = "polls/index.html"
     context_object_name = "latest_question_list"
@@ -91,3 +89,26 @@ class PirvateDetailView(generic.DetailView):
 class PirvateResultsView(generic.DetailView):
     model = Pirvate_Question
     template_name = "polls/pirvate_results.html"
+
+def pivate_vote(request, question_id):
+    question = get_object_or_404(Pirvate_Question, pk=question_id)
+    try:
+        selected_choice = question.choice_set.get(pk=request.POST["choice"])
+    except (KeyError, Choice.DoesNotExist):
+        # Redisplay the question voting form.
+        return render(
+            request,
+            "polls/pivate_detail.html",
+            {
+                "question": question,
+                "error_message": "You didn't select a choice.",
+            },
+        )
+    else:
+        selected_choice.votes = F("votes") + 1
+        selected_choice.save()
+
+        # Always return an HttpResponseRedirect after successfully dealing
+        # with POST data. This prevents data from being posted twice if a
+        # user hits the Back button.
+        return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))

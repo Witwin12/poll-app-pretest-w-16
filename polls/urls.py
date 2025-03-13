@@ -11,4 +11,5 @@ urlpatterns = [
     path("pivate/", views.pirvate_polls.as_view(), name='pivate'),
     path("pivate/<int:pk>/", views.PirvateDetailView.as_view(), name="pivatedetail"),
     path("pivate/<int:pk>/results/", views.PirvateResultsView.as_view(), name="pivateresults"),
+    path("pivate/<int:question_id>/vote/", views.pivate_vote, name="pivatevote"),
 ]
