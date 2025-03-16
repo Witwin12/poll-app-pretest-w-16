@@ -79,6 +79,7 @@ class pirvate_polls(generic.ListView):
 class PirvateDetailView(generic.DetailView):
     model = Pirvate_Question
     template_name = "polls/pirvate_detail.html"
+    context_object_name = 'question'
     def get_queryset(self):
         """
         Excludes any questions that aren't published yet.
@@ -89,12 +90,14 @@ class PirvateDetailView(generic.DetailView):
 class PirvateResultsView(generic.DetailView):
     model = Pirvate_Question
     template_name = "polls/pirvate_results.html"
+    context_object_name = 'question'
 
 def pivate_vote(request, question_id):
     question = get_object_or_404(Pirvate_Question, pk=question_id)
     try:
-        selected_choice = question.choice_set.get(pk=request.POST["choice"])
-    except (KeyError, Choice.DoesNotExist):
+        # ดึงตัวเลือกที่เกี่ยวข้องกับ Pirvate_Question
+        selected_choice = question.pirvate_choice_set.get(pk=request.POST["choice"])
+    except (KeyError, Pirvate_Choice.DoesNotExist):
         # Redisplay the question voting form.
         return render(
             request,
@@ -108,7 +111,5 @@ def pivate_vote(request, question_id):
         selected_choice.votes = F("votes") + 1
         selected_choice.save()
 
-        # Always return an HttpResponseRedirect after successfully dealing
-        # with POST data. This prevents data from being posted twice if a
-        # user hits the Back button.
-        return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
+        # Redirect ไปยังผลลัพธ์ของ private polls (คุณอาจต้องปรับชื่อ URL ด้วยถ้าจำเป็น)
+        return HttpResponseRedirect(reverse("polls:pivateresults", args=(question.id,)))

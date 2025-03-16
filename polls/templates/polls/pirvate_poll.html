@@ -10,7 +10,8 @@
 <h2>Pivate Questions</h2>
     <ul>
     {% for question in latest_question_list %}
-    <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
+    <li><a href="{% url 'polls:pivatedetail' question.id %}">{{ question.question_text }}</a>
+    </li>
     {% endfor %}
     </ul>
     {% else %}
