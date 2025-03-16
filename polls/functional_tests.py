@@ -62,6 +62,7 @@ class PivatePollsTest(LiveServerTestCase):
         # Step 1: Go to the polls index page
         driver.get("http://localhost:8000/polls/pivate/")
         self.assertIn("Pivate Questions", driver.page_source)
+        self.assertNotIn("test",driver.page_source)
 
         # Step 2: Click on a question (assuming ID 1)
         question_link = driver.find_element(By.CSS_SELECTOR, "body > ul > li:nth-child(3) > a")

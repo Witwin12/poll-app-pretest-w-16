@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
 
-from polls.models import Question
+from polls.models import Question,Pirvate_Question,Pirvate_Choice
 
 
 class QuestionModelTests(TestCase):
@@ -166,3 +166,31 @@ class WarmHotQuestionTests(TestCase):
         question = self.create_question_with_votes("Mixed Hot Question", days=-1, votes_list=[25, 30, 10])
         total_votes = sum(choice.votes for choice in question.choice_set.all())
         self.assertTrue(total_votes > 50)
+
+class PirvatePollsTestCase(TestCase):
+    def setUp(self):
+        """สร้างคำถามและตัวเลือกสำหรับ Pivate Polls"""
+        self.question = Pirvate_Question.objects.create(
+        question_text="Private Question 1?", 
+        pub_date=timezone.now()  # กำหนดค่า pub_date ให้มีค่าเริ่มต้น
+            )
+        self.choice1 = Pirvate_Choice.objects.create(question=self.question, choice_text="Private Choice 1", votes=0)
+        self.choice2 = Pirvate_Choice.objects.create(question=self.question, choice_text="Private Choice 2", votes=0)
+
+    def test_private_question_exists(self):
+        """ทดสอบว่าคำถาม private ถูกสร้างขึ้น"""
+        response = self.client.get(reverse("polls:pivate"))
+        self.assertContains(response, "Private Question 1?")
+
+    def test_private_vote(self):
+        """ทดสอบว่าการโหวตเพิ่มคะแนนของตัวเลือก"""
+        vote_url = reverse("polls:pivatevote", args=(self.question.id,))
+        response = self.client.post(vote_url, {"choice": self.choice1.id})
+
+        self.choice1.refresh_from_db()
+        self.assertEqual(self.choice1.votes, 1)
+
+    def test_private_poll_does_not_contain_public_questions(self):
+        """ตรวจสอบว่าหน้า Private Polls ไม่มีคำถามของ Public"""
+        response = self.client.get(reverse("polls:pivate"))
+        self.assertNotContains(response, "Public Question 1?")
